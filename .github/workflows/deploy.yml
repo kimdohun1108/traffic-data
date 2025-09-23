@@ -66,4 +66,4 @@ jobs:
           script: |
             pgrep java | xargs kill -9 || true
             cd /home/ubuntu/app
-            nohup java -jar *.jar > application.log 2>&1 &
+            nohup java -jar traffic-prediction-*.jar > application.log 2>&1 &
