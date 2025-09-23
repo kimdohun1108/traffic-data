@@ -21,11 +21,12 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build with Gradle
+      - name: Build with Gradle using bootJar
         run: ./gradlew bootJar
 
-      - name: Check for JAR file
-        run: ls -l build/libs/
+      # 빌드가 끝난 직후, build 폴더의 모든 내용물을 재귀적으로(하위 폴더까지) 확인
+      - name: DEBUG - List all files in build directory
+        run: ls -R build
 
       - name: Transfer JAR to EC2
         uses: appleboy/scp-action@master
@@ -37,13 +38,25 @@ jobs:
           source: "build/libs/*.jar"
           target: "/home/ubuntu/app"
 
-      - name: Execute SSH commands on EC2
+      # EC2에서 최종 명령을 실행하기 전에, 그리고 실행한 후에 app 폴더 상태를 확인
+      - name: DEBUG - Verify deployment on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
+            echo "--- Verifying files before execution ---"
+            ls -l /home/ubuntu/app
+            
+            echo "--- Starting application ---"
             pgrep java | xargs kill -9 || true
             cd /home/ubuntu/app
             nohup java -jar traffic-prediction-*.jar > application.log 2>&1 &
+            
+            echo "--- Verifying process after execution (wait 5s) ---"
+            sleep 5
+            ps -ef | grep java
+            
+            echo "--- Checking log file ---"
+            cat /home/ubuntu/app/application.log || echo "log file not found yet"
