@@ -5,7 +5,7 @@ name: Deploy to AWS EC2
 on:
   push:
     branches:
-      - main # "main" 브랜치에 코드가 push(업데이트)될 때마다 실행
+      - main
 
 # 2. 어떤 작업을 수행할 것인가?
 jobs:
@@ -67,23 +67,3 @@ jobs:
             pgrep java | xargs kill -9 || true
             cd /home/ubuntu/app
             nohup java -jar *.jar > application.log 2>&1 &
-```
-
----
-
-#### **3단계: 변경사항을 GitHub에 올리기**
-
-이제 우리가 만든 이 **"작업 지시서"** 자체를 GitHub에 올려야 합니다. 그래야 GitHub Actions 로봇이 이 지시서를 읽고 일을 시작할 수 있습니다.
-
-1.  **VS Code 터미널**을 엽니다.
-2.  아래 명령어들을 순서대로 실행하여 `.github` 폴더와 `deploy.yml` 파일을 GitHub에 올립니다.
-
-```bash
-# 1. 모든 변경사항 추가
-git add .
-
-# 2. 변경사항 기록 (메시지는 자유롭게)
-git commit -m "feat: Add GitHub Actions workflow for deployment"
-
-# 3. GitHub에 올리기
-git push origin main
