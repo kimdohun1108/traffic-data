@@ -36,12 +36,17 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
-      # 5단계: 빌드된 JAR 파일을 EC2 서버로 전송하기
+      # 5단계: 빌드 결과물(.jar 파일)이 제대로 생성되었는지 확인
+      # 이 단계는 build/libs/ 폴더의 파일 목록을 출력하여 .jar 파일 존재 여부를 확인합니다.
+      - name: Check for JAR file
+        run: ls -l build/libs/
+
+      # 6단계: 빌드된 JAR 파일을 EC2 서버로 전송하기
       - name: Transfer JAR to EC2
         # appleboy/scp-action 이라는 미리 만들어진 도구를 사용
         uses: appleboy/scp-action@master
         with:
-          # Phase 2에서 설정한 비밀 값들을 여기서 사용!
+          # github에서 설정한 비밀 값들을 여기서 사용!
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
@@ -49,7 +54,7 @@ jobs:
           source: "build/libs/*.jar" # build/libs/ 폴더에 있는 모든 .jar 파일을 전송
           target: "/home/ubuntu/app" # EC2 서버의 이 폴더로 전송
 
-      # 6단계: EC2 서버에 접속해서 애플리케이션 실행하기
+      # 7단계: EC2 서버에 접속해서 애플리케이션 실행하기
       - name: Execute SSH commands on EC2
         # appleboy/ssh-action 이라는 도구를 사용
         uses: appleboy/ssh-action@master
