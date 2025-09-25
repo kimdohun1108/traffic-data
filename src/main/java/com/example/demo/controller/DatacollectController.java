@@ -1,6 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.CitydataDto; 
+import com.example.demo.dto.Citydata; 
+import com.example.demo.dto.Citydata.RoadLinkStatus;
 import com.example.demo.repository.CitydataRepository; 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.beans.factory.annotation.Autowired; 
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Component
 public class DatacollectController implements CommandLineRunner{
@@ -29,31 +31,51 @@ public class DatacollectController implements CommandLineRunner{
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("🚀 데이터 수집 및 RDS 저장을 시작합니다...");
+        System.out.println("🚀 [Extract] 120개 핫스팟의 상세 도로/날씨/사고 데이터 수집을 시작합니다...");
 
         for (String place : places) {
-            String url = String.format("http://openapi.seoul.go.kr:8088/%s/xml/citydata/1/5/%s", apiKey, place);
+            String url = String.format("http://openapi.seoul.go.kr:8088/%s/xml/citydata/1/1000/%s", apiKey, place);
             try {
                 String xmlResponse = restTemplate.getForObject(url, String.class);
-                CityData temporaryXmlData = xmlMapper.readValue(xmlResponse, CityData.class);
+                Citydata temporaryXmlData = xmlMapper.readValue(xmlResponse, Citydata.class);
 
-                // API로 받은 데이터를 DB에 저장할 TrafficData 객체로 변환합니다.
-                CitydataDto citydataDto = new CitydataDto();
-                citydataDto.setPlaceName(place);
-                citydataDto.setAvgRoadIdx(temporaryXmlData.getRoadTrafficInfo().getRoadTrafficIdx());
-                citydataDto.setAvgRoadSpeed(temporaryXmlData.getRoadTrafficInfo().getRoadTrafficSpd());
-                citydataDto.setTemp(temporaryXmlData.getWeatherInfo().getTemp());
-                citydataDto.setPrecipitation(temporaryXmlData.getWeatherInfo().getPrecipitation());
-                citydataDto.setTimestamp(LocalDateTime.now());
+                List<RoadLinkStatus> roadStatusList = temporaryXmlData.getRoadTrafficStatus();
+                if (roadStatusList != null) {
+                    for (RoadLinkStatus roadStatus : roadStatusList) {
+                        // DB에 저장할 최종 보고서(CitydataDto)를 준비합니다.
+                        CitydataDto citydataDto = new CitydataDto();
+                        // 장소
+                        citydataDto.setHotspotName(place);
+                        
+                        // --- 도로 시각화 데이터 ---
+                        citydataDto.setRoadName(roadStatus.getRoadName());
+                        citydataDto.setStartXy(roadStatus.getStartNdXy());
+                        citydataDto.setEndXy(roadStatus.getEndNdXy());
 
-                // 데이터베이스에 저장!
-                citydataRepository.save(citydataDto);
-
-                System.out.println("✅ [" + place + "] 데이터 RDS 저장 완료");
+                        // --- ML 데이터 ---
+                        citydataDto.setSpeed(roadStatus.getSpd());
+                        if(temporaryXmlData.getWeatherInfo() != null){
+                            citydataDto.setTemp(temporaryXmlData.getWeatherInfo().getTemp());
+                            citydataDto.setWindSpd(temporaryXmlData.getWeatherInfo().getWindSpd());
+                            citydataDto.setPrecipitation(temporaryXmlData.getWeatherInfo().getPrecipitation());
+                            citydataDto.setPrecptType(temporaryXmlData.getWeatherInfo().getPrecptType());
+                            citydataDto.setNewsList(temporaryXmlData.getWeatherInfo().getNewsList());
+                        }
+                        if(temporaryXmlData.getAccidentInfo() != null){
+                            citydataDto.setAccidentStatus(temporaryXmlData.getAccidentInfo().getStatus());
+                        }
+                        
+                        citydataDto.setTimestamp(LocalDateTime.now());
+                        
+                        // 완성된 CitydataDto 객체를 DB에 저장합니다.
+                        citydataRepository.save(citydataDto);
+                    }
+                }
+                System.out.println("✅ [" + place + "] 주변 " + (roadStatusList != null ? roadStatusList.size() : 0) + "개 도로 구간 데이터 저장 완료");
             } catch (Exception e) {
                 System.out.println("❌ [" + place + "] 데이터 수집/저장 실패: " + e.getMessage());
             }
         }
-        System.out.println("💾 모든 데이터의 RDS 저장이 완료되었습니다.");
+        System.out.println("💾 [Extract] 모든 데이터의 RDS 저장이 완료되었습니다.");
     }
 }

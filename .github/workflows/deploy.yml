@@ -48,11 +48,15 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
+          scp:
+            # 1. 기존의 .jar 파일 배송 규칙은 그대로 둡니다.
+            - source: "build/libs/*.jar"
+              target: "/home/ubuntu/app"
+            # 2. dags 폴더를 통째로 배송하는 새로운 규칙을 추가합니다!
+            - source: "dags/"
+              target: "/home/ubuntu/airflow"
           script: |
-            echo "--- Verifying files after transfer ---"
-            ls -l /home/ubuntu/app
-            
-            echo "--- Starting application ---"
             pgrep java | xargs kill -9 || true
             cd /home/ubuntu/app
-            nohup java -jar traffic-prediction-*.jar > application.log 2>&1 &
+            # -Dspring.datasource.password=... : DB 비밀번호를 프로그램 실행 시 안전하게 전달
+            nohup java -Dspring.datasource.password=${{ secrets.DB_PASSWORD }} -jar traffic-prediction-*.jar > application.log 2>&1 &

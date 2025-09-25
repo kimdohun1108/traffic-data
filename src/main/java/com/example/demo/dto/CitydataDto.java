@@ -17,13 +17,23 @@ public class CitydataDto {
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
     private int id;
 
-    @Column(nullable = false) // DB에 저장될 때 이 값은 비어있으면 안됩니다.
-    private String placeName;
-    private String avgRoadIdx;
-    private String avgRoadSpeed;
-    private String temp;
-    private String precipitation;
+     @Column(nullable = false)
+    private String hotspotName; 
     
+    // 도로 시각화 데이터
+    private String roadName; // 34. 도로명
+    private String startXy; // 37. 시작점 좌표
+    private String endXy; // 40. 종점 좌표
+    
+    // ML 데이터
+    private String speed; // 42. 평균 속도
+    private String temp; // 176. 기온
+    private String windSpd; // 182. 풍속
+    private String precipitation; // 183. 강수량
+    private String precptType; // 184. 강수형태
+    private String newsList; // 200. 기상특보
+    private String accidentStatus; // 138. 사고통제현황
+
     @Column(nullable = false)
     private LocalDateTime timestamp;
 }
