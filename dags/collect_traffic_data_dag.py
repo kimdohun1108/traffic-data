@@ -10,7 +10,7 @@ from airflow.operators.python import PythonOperator
 # =============================================================================
 def etl_prediction_data():
     """
-    이것은 앞으로 우리가 채워나갈 'Transform & Load' 단계의 뼈대입니다.
+    123123이것은 앞으로 우리가 채워나갈 'Transform & Load' 단계의 뼈대입니다.
     1. RDS의 'raw_traffic_data'에서 최신 데이터를 Extract.
     2. ML 모델로 혼잡도를 예측(Transform).
     3. 예측 결과를 'prediction_results' 테이블에 Load.
