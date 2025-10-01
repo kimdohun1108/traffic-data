@@ -28,7 +28,7 @@ with DAG(
     dag_id='traffic_data_etl_pipeline', # DAG의 고유한 이름
     start_date=pendulum.datetime(2025, 9, 29, tz="Asia/Seoul"), # DAG 유효 시작 날짜
     description='서울시 핫스팟 교통/날씨 데이터를 수집하고 혼잡도를 예측하는 ETL 파이프라인',
-    schedule='0 8,18 * * *', # 한국 시간(KST) 오전 8시와 오후 6시에 실행
+    schedule='*/2 * * * *', # 한국 시간(KST) 오전 8시와 오후 6시에 실행 # '0 8,18 * * *'
     catchup=False, # 과거에 놓친 스케줄을 한꺼번에 실행하지 않음
     tags=['traffic', 'etl', 'ml'],
 ) as dag:
