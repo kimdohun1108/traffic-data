@@ -45,7 +45,7 @@ public class DatacollectController implements CommandLineRunner{
                     .toUri();
 
             try {
-                String xmlResponse = restTemplate.getForObject(url, String.class);
+                String xmlResponse = restTemplate.getForObject(uri, String.class);
                 Citydata temporaryXmlData = xmlMapper.readValue(xmlResponse, Citydata.class);
 
                 List<RoadLinkStatus> roadStatusList = temporaryXmlData.getRoadTrafficStatus();
