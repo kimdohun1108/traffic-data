@@ -7,7 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class DemoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
+		new SpringApplicationBuilder(DemoApplication.class)
+				.web(WebApplicationType.NONE) // 웹 기능을 끕니다!
+				.run(args);
 	}
 
 }
