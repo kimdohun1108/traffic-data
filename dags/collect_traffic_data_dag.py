@@ -37,7 +37,7 @@ with DAG(
     task_extract_raw_data = BashOperator(
         task_id='extract_raw_data_from_api',
         # Airflow Connection에 저장된 DB 비밀번호를 안전하게 사용합니다.
-        bash_command='java -Dspring.datasource.password={{ conn.aws_rds_traffic_db.password }} -jar /opt/airflow/app/traffic-prediction-*.jar',
+        bash_command='java -Dfile.encoding=UTF-8 -Dspring.datasource.password={{ conn.aws_rds_traffic_db.password }} -jar /opt/airflow/app/traffic-prediction-*.jar',
     )
 
     # --- Task 2: Transform & Load ---
