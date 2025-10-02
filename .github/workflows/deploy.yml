@@ -51,12 +51,15 @@ jobs:
             pgrep java | xargs kill -9 || true
             
             # 2. 기존 폴더 정리
-            rm -rf /home/ubuntu/app/*
-            rm -rf /home/ubuntu/airflow/dags/*
+            rm -rf /home/ubuntu/app/* || true  
+            rm -rf /home/ubuntu/airflow/dags/* || true
             
             # 3. 임시 폴더에서 실제 위치로 파일 이동
             mv /home/ubuntu/deploy_temp/*.jar /home/ubuntu/app/
             mv /home/ubuntu/deploy_temp/dags/* /home/ubuntu/airflow/dags/
+
+            # 임시 폴더 정리
+            rm -rf /home/ubuntu/deploy_temp/* || true
             
             # 4. 새 애플리케이션 실행
             cd /home/ubuntu/app
