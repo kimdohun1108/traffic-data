@@ -47,21 +47,16 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            echo "--- [CCTV 1] Contents of the temporary deployment folder ---"
-            ls -lR /home/ubuntu/deploy_temp
-            
-            # 2. 기존 폴더 정리
+            # 1. 기존 폴더 정리
             rm -rf /home/ubuntu/app/* || true  
             rm -rf /home/ubuntu/airflow/dags/* || true
             
-            # 3. 임시 폴더에서 실제 위치로 파일 이동
-            mv /home/ubuntu/deploy_temp/*.jar /home/ubuntu/app/
+            # 2. 임시 폴더에서 실제 위치로 파일 이동
+            mv /home/ubuntu/deploy_temp/build/libs/*.jar /home/ubuntu/app/
             mv /home/ubuntu/deploy_temp/dags/* /home/ubuntu/airflow/dags/
 
-            echo "--- [CCTV 2] Contents of the final app folder ---"
-            ls -lR /home/ubuntu/app
-            echo "--- [CCTV 2] Contents of the final dags folder ---"
-            ls -lR /home/ubuntu/airflow/dags
+            # 3. 임시 폴더 정리
+            rm -rf /home/ubuntu/deploy_temp
             
             # 4. 새 애플리케이션 실행
             cd /home/ubuntu/app
