@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -11,6 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @JacksonXmlRootElement(localName = "SeoulRtd.citydata")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Citydata {
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "ROAD_TRAFFIC_STTS")
