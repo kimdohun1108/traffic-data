@@ -47,8 +47,8 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            # 1. 기존 앱 중지
-            pgrep java | xargs kill -9 || true
+            echo "--- [CCTV 1] Contents of the temporary deployment folder ---"
+            ls -lR /home/ubuntu/deploy_temp
             
             # 2. 기존 폴더 정리
             rm -rf /home/ubuntu/app/* || true  
@@ -58,9 +58,12 @@ jobs:
             mv /home/ubuntu/deploy_temp/*.jar /home/ubuntu/app/
             mv /home/ubuntu/deploy_temp/dags/* /home/ubuntu/airflow/dags/
 
-            # 임시 폴더 정리
-            rm -rf /home/ubuntu/deploy_temp/* || true
+            echo "--- [CCTV 2] Contents of the final app folder ---"
+            ls -lR /home/ubuntu/app
+            echo "--- [CCTV 2] Contents of the final dags folder ---"
+            ls -lR /home/ubuntu/airflow/dags
             
             # 4. 새 애플리케이션 실행
             cd /home/ubuntu/app
+            pgrep java | xargs kill -9 || true
             nohup java -Dspring.datasource.password=${{ secrets.DB_PASSWORD }} -jar traffic-prediction-*.jar > application.log 2>&1 &
