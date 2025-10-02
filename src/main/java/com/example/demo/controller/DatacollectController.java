@@ -10,8 +10,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.net.URI;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,9 +38,12 @@ public class DatacollectController implements CommandLineRunner{
         System.out.println("🚀 [Extract] 120개 핫스팟의 상세 도로/날씨/사고 데이터 수집을 시작합니다...");
 
         for (String place : places) {
-            String encodedPlace = URLEncoder.encode(place, StandardCharsets.UTF_8);
-            String url = String.format("http://openapi.seoul.go.kr:8088/%s/xml/citydata/1/1000/%s", apiKey, encodedPlace);
-            
+             URI uri = UriComponentsBuilder
+                    .fromUriString("http://openapi.seoul.go.kr:8088")
+                    .path("/{apiKey}/xml/citydata/1/1000/{placeName}")
+                    .buildAndExpand(apiKey, place) // 변수를 안전하게 인코딩하며 채워넣음
+                    .toUri();
+
             try {
                 String xmlResponse = restTemplate.getForObject(url, String.class);
                 Citydata temporaryXmlData = xmlMapper.readValue(xmlResponse, Citydata.class);
